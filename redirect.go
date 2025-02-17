@@ -2,9 +2,11 @@ package main
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 
-	spinhttp "github.com/fermyon/spin/sdk/go/http"
+	spinhttp "github.com/fermyon/spin/sdk/go/v2/http"
 )
 
 const (
@@ -16,6 +18,8 @@ const (
 	destinationKey string = "destination"
 	// Key for loading desired HTTP status code
 	statusCodeKey string = "statuscode"
+	// Key to enable adding original path in redirect
+	includePath = "include_path"
 )
 
 func init() {
@@ -43,7 +47,7 @@ func (s SpinRedirect) handleFunc(w http.ResponseWriter, r *http.Request) {
 	dest, _ := s.getDestination()
 	code, _ := s.getStatusCode(r.Method)
 
-	w.Header().Set("Location", dest)
+	w.Header().Set("Location", s.WithPath(dest, r))
 	w.WriteHeader(code)
 }
 
@@ -55,6 +59,26 @@ func (s SpinRedirect) getDestination() (string, bool) {
 		return DefaultRedirectionTarget, false
 	}
 	return d, true
+}
+
+func (s SpinRedirect) WithPath(dest string, r *http.Request) string {
+	d := s.cfg.Get(includePath)
+	if d != "true" {
+		return dest
+	}
+
+	u, err := url.Parse(dest)
+	if err != nil {
+		return dest
+	}
+
+	// Combine paths if request has a non-empty path
+	if r.URL.Path != "" && r.URL.Path != "/" {
+		// Ensure we don't double-slash when combining paths
+		u.Path = strings.TrimSuffix(u.Path, "/") + "/" + strings.TrimPrefix(r.URL.Path, "/")
+	}
+
+	return u.String()
 }
 
 // getStatusCode returns the HTTP status code

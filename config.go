@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	config "github.com/fermyon/spin/sdk/go/config"
+	variables "github.com/fermyon/spin/sdk/go/v2/variables"
 )
 
 type ConfigReader interface {
@@ -43,7 +43,7 @@ Usage:
 	value := cfg.Get("destination")
 */
 func (c DefaultConfigReader) Get(key string) string {
-	v, err := config.Get(key)
+	v, err := variables.Get(key)
 	if err != nil {
 		return os.Getenv(strings.ToUpper(key))
 	}
