@@ -1,10 +1,10 @@
-package main
+package redirect
 
 import (
 	"os"
 	"strings"
 
-	config "github.com/fermyon/spin/sdk/go/config"
+	config "github.com/spinframework/spin-go-sdk/variables"
 )
 
 type ConfigReader interface {

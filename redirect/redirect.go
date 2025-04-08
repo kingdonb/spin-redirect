@@ -1,4 +1,4 @@
-package main
+package redirect
 
 import (
 	"net/http"
@@ -6,8 +6,6 @@ import (
 	"path"
 	"strconv"
 	"strings"
-
-	spinhttp "github.com/fermyon/spin/sdk/go/http"
 )
 
 const (
@@ -25,14 +23,6 @@ const (
 	trimPrefixKey string = "trim_prefix"
 )
 
-func init() {
-	r := NewSpinRedirect()
-	spinhttp.Handle(r.handleFunc)
-}
-
-func main() {
-}
-
 // SpinRedirect is a struct that provides a handleFunc
 // for redirecting to a destination URL using configurable HTTP status code.
 type SpinRedirect struct {
@@ -46,7 +36,7 @@ func NewSpinRedirect() SpinRedirect {
 	}
 }
 
-func (s SpinRedirect) handleFunc(w http.ResponseWriter, r *http.Request) {
+func (s SpinRedirect) HandleFunc(w http.ResponseWriter, r *http.Request) {
 	dest, _ := s.getDestination()
 	code, _ := s.getStatusCode(r.Method)
 
