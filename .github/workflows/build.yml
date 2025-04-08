@@ -24,7 +24,12 @@ jobs:
           wget https://github.com/tinygo-org/tinygo/releases/download/v0.37.0/tinygo_0.37.0_amd64.deb
           sudo dpkg -i tinygo_0.37.0_amd64.deb
 
-      - name: Make
+      - name: Build
         env:
           ENABLE_WASM_OPT: false
         run: make build
+
+      - name: Test
+        env:
+          ENABLE_WASM_OPT: false
+        run: make test

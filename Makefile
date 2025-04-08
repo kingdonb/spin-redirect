@@ -6,3 +6,7 @@ build:
 ifeq ($(ENABLE_WASM_OPT),true)
 	wasm-opt -Os -o redirect.wasm redirect.wasm
 endif
+
+.PHONY: test
+test:
+	tinygo test -target=wasip1 -gc=leaking -v ./redirect/...
