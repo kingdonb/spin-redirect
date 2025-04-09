@@ -1,10 +1,11 @@
-package main
+package redirect
 
 import (
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
-
-	spinhttp "github.com/fermyon/spin/sdk/go/http"
+	"strings"
 )
 
 const (
@@ -16,15 +17,11 @@ const (
 	destinationKey string = "destination"
 	// Key for loading desired HTTP status code
 	statusCodeKey string = "statuscode"
+	// Key to enable adding original path in redirect
+	includePathKey string = "include_path"
+	// Key for trimming a preceding portion of the included path
+	trimPrefixKey string = "trim_prefix"
 )
-
-func init() {
-	r := NewSpinRedirect()
-	spinhttp.Handle(r.handleFunc)
-}
-
-func main() {
-}
 
 // SpinRedirect is a struct that provides a handleFunc
 // for redirecting to a destination URL using configurable HTTP status code.
@@ -39,11 +36,11 @@ func NewSpinRedirect() SpinRedirect {
 	}
 }
 
-func (s SpinRedirect) handleFunc(w http.ResponseWriter, r *http.Request) {
+func (s SpinRedirect) HandleFunc(w http.ResponseWriter, r *http.Request) {
 	dest, _ := s.getDestination()
 	code, _ := s.getStatusCode(r.Method)
 
-	w.Header().Set("Location", dest)
+	w.Header().Set("Location", s.WithPath(dest, r))
 	w.WriteHeader(code)
 }
 
@@ -91,4 +88,22 @@ func isValidRedirectStatusCode(code int, method string) bool {
 		}
 	}
 	return false
+}
+
+// WithPath returns the provided dest with the path portion of the request,
+// assuming the includePathKey has a value of true
+func (s SpinRedirect) WithPath(dest string, r *http.Request) string {
+	includePath := s.cfg.Get(includePathKey)
+	if includePath != "true" {
+		return dest
+	}
+
+	u, err := url.Parse(dest)
+	if err != nil {
+		return dest
+	}
+
+	u.Path = path.Join(u.Path, strings.TrimPrefix(r.URL.Path, s.cfg.Get(trimPrefixKey)))
+
+	return u.String()
 }

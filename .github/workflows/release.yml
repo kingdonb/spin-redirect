@@ -16,6 +16,11 @@ jobs:
       - name: set the release version (tag)
         run: echo "RELEASE_VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
 
+      - name: Setup Wasmtime
+        uses: bytecodealliance/actions/wasmtime/setup@v1
+        with:
+          version: "31.0.0"
+
       - name: "Install Go"
         uses: actions/setup-go@v3
         with:
@@ -26,10 +31,13 @@ jobs:
           wget https://github.com/tinygo-org/tinygo/releases/download/v0.37.0/tinygo_0.37.0_amd64.deb
           sudo dpkg -i tinygo_0.37.0_amd64.deb
 
-      - name: Make
+      - name: Build
         env:
           ENABLE_WASM_OPT: false
         run: make build
+
+      - name: Test
+        run: make test
 
       - name: generate checksums
         run: |
