@@ -10,6 +10,3 @@ func init() {
 	r := redirect.NewSpinRedirect()
 	spinhttp.Handle(r.HandleFunc)
 }
-
-func main() {
-}

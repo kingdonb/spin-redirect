@@ -30,7 +30,7 @@ func TestWithPath(t *testing.T) {
 		wantURL string
 	}
 
-	var tests = []test{
+	tests := []test{
 		{
 			"include_path false",
 			testConfigReader{},
@@ -51,20 +51,22 @@ func TestWithPath(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		r := &SpinRedirect{
-			cfg: &test.cfg,
-		}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			r := &SpinRedirect{
+				cfg: &tc.cfg,
+			}
 
-		dest := "http://localhost"
-		req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost%s", test.reqPath), nil)
-		if err != nil {
-			t.Fatalf("failed to create new http request: %s", err.Error())
-		}
+			dest := "http://localhost"
+			req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost%s", tc.reqPath), nil)
+			if err != nil {
+				t.Fatalf("failed to create new http request: %s", err)
+			}
 
-		gotURL := r.WithPath(dest, req)
-		if gotURL != test.wantURL {
-			t.Fatalf("test '%s' failed: got '%s', want '%s'", test.name, gotURL, test.wantURL)
-		}
+			gotURL := r.WithPath(dest, req)
+			if gotURL != tc.wantURL {
+				t.Fatalf("failed: got '%s', want '%s'", gotURL, tc.wantURL)
+			}
+		})
 	}
 }
